@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,6 +15,7 @@ namespace UzaySimulasyon
         private string varis_gezegeni;
         private DateTime cikis_tarihi;
         private int mesafe_saat_olarak;
+        private List<Kisi> kisiler;
 
         public UzayAraci(string p_uzay_araci_adi,  string p_cikis_gezegeni, string p_varis_gezegeni, DateTime p_cikis_tarihi, int p_mesafe_saat_olarak, string p_durum = "BEKLIYOR") 
         { 
@@ -23,6 +25,7 @@ namespace UzaySimulasyon
             this.varis_gezegeni = p_varis_gezegeni;
             this.cikis_tarihi = p_cikis_tarihi;
             this.mesafe_saat_olarak = p_mesafe_saat_olarak;
+            this.kisiler = new List<Kisi>();
         }
 
 
@@ -62,13 +65,18 @@ namespace UzaySimulasyon
             set { this.mesafe_saat_olarak = value; }
         }
 
+        public List<Kisi> Kisiler
+        {
+            get {return this.kisiler;}
+        }
+
         public static bool TumAraclarVardiMi(List<UzayAraci> araclar)
         {
             bool kosul = true;
 
             foreach(UzayAraci arac in araclar)
             {
-                if(arac.durum == "VARDI")
+                if(arac.durum == "VARDI" || arac.durum == "IMHA")
                     continue;
                 else
                     kosul = false;
@@ -77,6 +85,49 @@ namespace UzaySimulasyon
             if (kosul)
                 return true;
             else return false;
+        }
+
+        public static void Kisileri_Araclara_Yerlestir(List<Kisi> _kisiler,  List<UzayAraci> _araclar)
+        {
+            foreach(UzayAraci arac in _araclar)
+            {
+                foreach (Kisi kisi in _kisiler)
+                {
+                    if (kisi.Bulundugu_uzay_araci_adi == arac.uzay_araci_adi)
+                    {
+                        arac.kisiler.Add(kisi);
+                    }
+            }
+            }
+            
+        }
+
+        public static void Arac_Imha_Olacak_Mi(List<UzayAraci> araclar)
+        {
+            bool kosul = false;
+
+            foreach(UzayAraci arac in araclar)
+            {
+                
+                foreach(Kisi kisi in arac.kisiler)
+                {
+                    if(kisi.Durum == "CANLI")
+                    {
+                        kosul = false;
+                        break;
+                    }
+                    else if(kisi.Durum == "ÖLDÜ")
+                    {
+                        kosul = true;
+                    }
+                }
+
+                if (kosul)
+                {
+                    arac.Durum = "IMHA";
+                }
+
+            }
         }
     }
 }
